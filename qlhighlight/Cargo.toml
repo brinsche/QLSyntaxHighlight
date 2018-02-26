@@ -1,0 +1,10 @@
+[package]
+name = "qlhighlight"
+version = "0.1.0"
+authors = ["Bastian Rinsche <bastian.rinsche@gmail.com>"]
+
+[lib]
+name = "qlhighlight"
+crate-type = ["staticlib"]
+
+[dependencies]
