@@ -10,9 +10,9 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
 void CancelPreviewGeneration(void *thisInterface, QLPreviewRequestRef preview);
 
 /* -----------------------------------------------------------------------------
-   Generate a preview for file
-   This function's job is to create preview for designated file
-   ----------------------------------------------------------------------------- */
+ Generate a preview for file
+ This function's job is to create preview for designated file
+ ----------------------------------------------------------------------------- */
 
 OSStatus GeneratePreviewForURL(void *thisInterface,
                                QLPreviewRequestRef preview,
@@ -27,15 +27,14 @@ OSStatus GeneratePreviewForURL(void *thisInterface,
         
         // The above might have taken some time, so before proceeding make sure the user didn't cancel the request
         if (QLPreviewRequestIsCancelled(preview)) { return noErr; }
-
         
-        NSString *html = @(highlight_html());
+        NSString *html = @(highlight_html(url));
         
         // Put metadata and attachment in a dictionary
         NSDictionary *properties = @{ // properties for the HTML data
-            (__bridge NSString *)kQLPreviewPropertyTextEncodingNameKey : @"UTF-8",
-            (__bridge NSString *)kQLPreviewPropertyMIMETypeKey : @"text/html",
-        };
+                                     (__bridge NSString *)kQLPreviewPropertyTextEncodingNameKey : @"UTF-8",
+                                     (__bridge NSString *)kQLPreviewPropertyMIMETypeKey : @"text/html",
+                                     };
         
         // Pass preview data and metadata/attachment dictionary to QuickLook
         QLPreviewRequestSetDataRepresentation(preview,
