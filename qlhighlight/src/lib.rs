@@ -1,25 +1,39 @@
 extern crate core_foundation;
 extern crate core_foundation_sys;
+extern crate syntect;
 
 use std::ffi::CString;
 use core_foundation::url::CFURL;
 use core_foundation_sys::url::CFURLRef;
 
+use std::fmt::Write;
+
 use core_foundation::base::TCFType;
 
-use std::io::Read;
-use std::fs::File;
+use syntect::parsing::SyntaxSet;
+use syntect::highlighting::{Color, ThemeSet};
+use syntect::html::highlighted_snippet_for_file;
 
 #[no_mangle]
 pub extern "C" fn highlight_html(url: CFURLRef) -> CString {
     let url = unsafe { CFURL::wrap_under_get_rule(url) };
     let path = url.to_path().unwrap();
 
-    let mut f = File::open(path).unwrap();
     let mut buffer = String::new();
 
-    f.read_to_string(&mut buffer).unwrap();
+    let ss = SyntaxSet::load_defaults_nonewlines();
+    let ts = ThemeSet::load_defaults();
 
-    let html = format!("<html><body>{}</body></html>", buffer);
-    CString::new(html).unwrap()
+    let theme = &ts.themes["base16-ocean.dark"];
+    let c = theme.settings.background.unwrap_or(Color::WHITE);
+    write!(
+        buffer,
+        "<body style=\"background-color:#{:02x}{:02x}{:02x};\">\n",
+        c.r, c.g, c.b
+    );
+    let html = highlighted_snippet_for_file(path, &ss, theme).unwrap();
+    write!(buffer, "{}", html);
+    write!(buffer, "{}", "</body>");
+
+    CString::new(buffer).unwrap()
 }
