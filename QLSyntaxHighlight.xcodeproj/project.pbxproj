@@ -8,9 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8C32DD1720474309002C4685 /* GenerateThumbnailForURL.c in Sources */ = {isa = PBXBuildFile; fileRef = 8C32DD1620474309002C4685 /* GenerateThumbnailForURL.c */; };
-		8C32DD1920474309002C4685 /* GeneratePreviewForURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C32DD1820474309002C4685 /* GeneratePreviewForURL.m */; };
 		8C32DD1B20474309002C4685 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 8C32DD1A20474309002C4685 /* main.c */; };
-		8C32DD232047548D002C4685 /* qlhighlight.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C32DD222047548D002C4685 /* qlhighlight.h */; };
 		8C32DD2A2047551E002C4685 /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C32DD292047551E002C4685 /* libresolv.tbd */; };
 /* End PBXBuildFile section */
 
@@ -27,10 +25,8 @@
 /* Begin PBXFileReference section */
 		8C32DD1320474309002C4685 /* QLSyntaxHighlight.qlgenerator */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QLSyntaxHighlight.qlgenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C32DD1620474309002C4685 /* GenerateThumbnailForURL.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = GenerateThumbnailForURL.c; sourceTree = "<group>"; };
-		8C32DD1820474309002C4685 /* GeneratePreviewForURL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GeneratePreviewForURL.m; sourceTree = "<group>"; };
 		8C32DD1A20474309002C4685 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		8C32DD1C20474309002C4685 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8C32DD222047548D002C4685 /* qlhighlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = qlhighlight.h; path = qlhighlight/src/qlhighlight.h; sourceTree = SOURCE_ROOT; };
 		8C32DD292047551E002C4685 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -66,9 +62,7 @@
 		8C32DD1520474309002C4685 /* QLSyntaxHighlight */ = {
 			isa = PBXGroup;
 			children = (
-				8C32DD222047548D002C4685 /* qlhighlight.h */,
 				8C32DD1620474309002C4685 /* GenerateThumbnailForURL.c */,
-				8C32DD1820474309002C4685 /* GeneratePreviewForURL.m */,
 				8C32DD1A20474309002C4685 /* main.c */,
 				8C32DD1C20474309002C4685 /* Info.plist */,
 			);
@@ -90,7 +84,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8C32DD232047548D002C4685 /* qlhighlight.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -185,7 +178,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8C32DD1720474309002C4685 /* GenerateThumbnailForURL.c in Sources */,
-				8C32DD1920474309002C4685 /* GeneratePreviewForURL.m in Sources */,
 				8C32DD1B20474309002C4685 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
