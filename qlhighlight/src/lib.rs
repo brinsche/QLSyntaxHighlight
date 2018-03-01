@@ -52,7 +52,7 @@ pub extern "C" fn GeneratePreviewForURL(
     let ss = SyntaxSet::load_defaults_nonewlines();
     let ts = ThemeSet::load_defaults();
 
-    let theme = &ts.themes["base16-ocean.dark"];
+    let theme = &ts.themes["InspiredGitHub"];
     let c = theme.settings.background.unwrap_or(Color::WHITE);
     write!(
         buffer,
