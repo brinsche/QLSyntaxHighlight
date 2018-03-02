@@ -3,6 +3,7 @@ extern crate core_foundation_sys;
 extern crate syntect;
 
 use std::fmt::Write;
+use std::io::Cursor;
 
 use core_foundation::base::TCFType;
 use core_foundation::data::{CFData, CFDataRef};
@@ -12,7 +13,6 @@ use core_foundation::string::CFStringRef;
 use core_foundation::dictionary::CFDictionaryRef;
 
 use syntect::parsing::SyntaxSet;
-use syntect::highlighting::{Color, ThemeSet};
 use syntect::html::highlighted_snippet_for_file;
 
 #[repr(C)]
@@ -27,6 +27,8 @@ pub type QLPreviewRequestRef = *mut __QLPreviewRequest;
 extern "C" {
     #[link_name = "kUTTypeHTML"]
     pub static kUTTypeHTML: CFStringRef;
+    #[link_name = "kUTTypePlainText"]
+    pub static kUTTypePlainText: CFStringRef;
     pub fn QLPreviewRequestSetDataRepresentation(
         preview: QLPreviewRequestRef,
         data: CFDataRef,
@@ -50,18 +52,19 @@ pub extern "C" fn GeneratePreviewForURL(
     let mut buffer = String::new();
 
     let ss = SyntaxSet::load_defaults_nonewlines();
-    let ts = ThemeSet::load_defaults();
+    let xcode_theme = include_bytes!("../res/XCodelike.tmTheme");
+    let theme = syntect::highlighting::ThemeSet::load_from_reader(&mut Cursor::new(
+        &xcode_theme[..],
+    )).unwrap();
 
-    let theme = &ts.themes["InspiredGitHub"];
-    let c = theme.settings.background.unwrap_or(Color::WHITE);
-    write!(
-        buffer,
-        "<body style=\"background-color:#{:02x}{:02x}{:02x};\">\n",
-        c.r, c.g, c.b
-    );
-    let html = highlighted_snippet_for_file(path, &ss, theme).unwrap();
+    let style = "
+        pre {
+            font-size: 11px;
+            font-family: Menlo, monospace;
+        }";
+    write!(buffer, "<head><style>{}</style></head>", style);
+    let html = highlighted_snippet_for_file(path, &ss, &theme).unwrap();
     write!(buffer, "{}", html);
-    write!(buffer, "{}", "</body>");
 
     let data = CFData::from_buffer(buffer.as_bytes());
 
