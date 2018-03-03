@@ -13,6 +13,7 @@ use core_foundation::string::CFStringRef;
 use core_foundation::dictionary::CFDictionaryRef;
 
 use syntect::parsing::SyntaxSet;
+use syntect::highlighting::{Color, ThemeSet};
 use syntect::html::highlighted_snippet_for_file;
 
 #[repr(C)]
@@ -49,19 +50,29 @@ pub extern "C" fn GeneratePreviewForURL(
     let url = unsafe { CFURL::wrap_under_get_rule(url) };
     let path = url.to_path().unwrap();
 
-    let mut buffer = String::new();
-
-    let ss = SyntaxSet::load_defaults_nonewlines();
     let xcode_theme = include_bytes!("../res/XCodelike.tmTheme");
-    let theme = syntect::highlighting::ThemeSet::load_from_reader(&mut Cursor::new(
+    let xcode_theme = syntect::highlighting::ThemeSet::load_from_reader(&mut Cursor::new(
         &xcode_theme[..],
     )).unwrap();
 
-    let style = "
-        pre {
-            font-size: 11px;
-            font-family: Menlo, monospace;
-        }";
+    let theme = xcode_theme;
+    let font_size = 11;
+    let font_family = "Menlo, monospace";
+
+    let ss = SyntaxSet::load_defaults_nonewlines();
+
+    let style = format!(
+        "pre {{ font-size: {}px; font-family: {}; }}",
+        font_size, font_family
+    );
+    let c = theme.settings.background.unwrap_or(Color::WHITE);
+
+    let mut buffer = String::new();
+    write!(
+        buffer,
+        "<body style=\"background-color:#{:02x}{:02x}{:02x};\">\n",
+        c.r, c.g, c.b
+    );
     write!(buffer, "<head><style>{}</style></head>", style);
     let html = highlighted_snippet_for_file(path, &ss, &theme).unwrap();
     write!(buffer, "{}", html);
