@@ -1,10 +1,7 @@
-use core_foundation::base::CFType;
-use core_foundation::base::TCFType;
-use core_foundation::array::CFArray;
-use core_foundation::string::CFString;
-use core_foundation::string::CFStringRef;
+use core_foundation::array::{CFArray, CFArrayRef};
+use core_foundation::base::{CFType, TCFType};
+use core_foundation::string::{CFString, CFStringRef};
 use core_foundation::dictionary::{CFDictionary, CFDictionaryRef};
-use core_foundation::array::CFArrayRef;
 
 extern "C" {
     pub fn CFPreferencesCopyMultiple(

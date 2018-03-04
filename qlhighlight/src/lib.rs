@@ -1,45 +1,25 @@
 extern crate core_foundation;
-extern crate core_foundation_sys;
 extern crate syntect;
 
 mod util;
+mod quicklook;
 
 use std::fmt::Write;
 use std::io::Cursor;
 
-use core_foundation::base::TCFType;
-use core_foundation::data::{CFData, CFDataRef};
-use core_foundation::url::CFURL;
-use core_foundation_sys::url::CFURLRef;
+use core_foundation::base::{OSStatus, TCFType};
+use core_foundation::data::CFData;
+use core_foundation::url::{CFURLRef, CFURL};
 use core_foundation::string::CFStringRef;
 use core_foundation::dictionary::CFDictionaryRef;
 
-use syntect::parsing::SyntaxSet;
 use syntect::highlighting::{Color, ThemeSet};
 use syntect::html::highlighted_snippet_for_file;
+use syntect::parsing::SyntaxSet;
 
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct __QLPreviewRequest {
-    _unused: [u8; 0],
-}
-pub type Boolean = ::std::os::raw::c_uchar;
-pub type OSStatus = ::std::os::raw::c_int;
-pub type QLPreviewRequestRef = *mut __QLPreviewRequest;
-
-extern "C" {
-    #[link_name = "kUTTypeHTML"]
-    pub static kUTTypeHTML: CFStringRef;
-    #[link_name = "kUTTypePlainText"]
-    pub static kUTTypePlainText: CFStringRef;
-    pub fn QLPreviewRequestSetDataRepresentation(
-        preview: QLPreviewRequestRef,
-        data: CFDataRef,
-        contentTypeUTI: CFStringRef,
-        properties: CFDictionaryRef,
-    );
-    pub fn QLPreviewRequestIsCancelled(preview: QLPreviewRequestRef) -> Boolean;
-}
+use quicklook::QLPreviewRequestRef;
+use quicklook::QLPreviewRequestSetDataRepresentation;
+use quicklook::kUTTypeHTML;
 
 #[no_mangle]
 pub extern "C" fn GeneratePreviewForURL(
