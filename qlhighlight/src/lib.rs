@@ -2,6 +2,8 @@ extern crate core_foundation;
 extern crate core_foundation_sys;
 extern crate syntect;
 
+mod util;
+
 use std::fmt::Write;
 use std::io::Cursor;
 
@@ -50,20 +52,19 @@ pub extern "C" fn GeneratePreviewForURL(
     let url = unsafe { CFURL::wrap_under_get_rule(url) };
     let path = url.to_path().unwrap();
 
-    let xcode_theme = include_bytes!("../res/XCodelike.tmTheme");
-    let xcode_theme = syntect::highlighting::ThemeSet::load_from_reader(&mut Cursor::new(
-        &xcode_theme[..],
-    )).unwrap();
+    let conf = util::get_settings();
+    let theme_bytes = include_bytes!("../res/XCodelike.tmTheme");
+    let xcode_theme = ThemeSet::load_from_reader(&mut Cursor::new(&theme_bytes[..])).unwrap();
 
-    let theme = xcode_theme;
-    let font_size = 11;
-    let font_family = "Menlo, monospace";
-
-    let ss = SyntaxSet::load_defaults_nonewlines();
+    let ts = ThemeSet::load_defaults();
+    let syntax_set = SyntaxSet::load_defaults_nonewlines();
+    let theme = ts.themes
+        .get(&conf.theme_name.to_string())
+        .unwrap_or(&xcode_theme);
 
     let style = format!(
         "pre {{ font-size: {}px; font-family: {}; }}",
-        font_size, font_family
+        conf.font_size, conf.font_family
     );
     let c = theme.settings.background.unwrap_or(Color::WHITE);
 
@@ -74,7 +75,7 @@ pub extern "C" fn GeneratePreviewForURL(
         c.r, c.g, c.b
     );
     write!(buffer, "<head><style>{}</style></head>", style);
-    let html = highlighted_snippet_for_file(path, &ss, &theme).unwrap();
+    let html = highlighted_snippet_for_file(path, &syntax_set, theme).unwrap();
     write!(buffer, "{}", html);
 
     let data = CFData::from_buffer(buffer.as_bytes());
