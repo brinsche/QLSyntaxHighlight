@@ -31,4 +31,12 @@ Setting a theme (default is an [included xcode-like theme](qlhighlight/res/Xcode
 
 Available themes are the default theme and [these](https://docs.rs/syntect/2.0.0/syntect/highlighting/struct.ThemeSet.html#method.load_defaults).
 
+Adding additional themes. Set to absolute path of directory containing `.tmTheme` files:
+
+    defaults write de.bastianrinsche.QLSyntaxHighlight themeDirectory '/path/to/themes'
+    
+Adding addiontal syntaxes. Set to absolute path of directory containing `.sublime-syntax` files:
+
+    defaults write de.bastianrinsche.QLSyntaxHighlight syntaxDirectory '/path/to/syntaxes'
+
 ![screenshot](img/screenshot.png)

@@ -3,6 +3,7 @@ use core_foundation::data::CFDataRef;
 use core_foundation::string::CFStringRef;
 use core_foundation::dictionary::CFDictionaryRef;
 
+#[allow(dead_code)]
 extern "C" {
     #[link_name = "kUTTypeHTML"]
     pub static kUTTypeHTML: CFStringRef;

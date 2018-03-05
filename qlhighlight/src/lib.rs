@@ -6,6 +6,7 @@ mod quicklook;
 
 use std::fmt::Write;
 use std::io::Cursor;
+use std::path::Path;
 
 use core_foundation::base::{OSStatus, TCFType};
 use core_foundation::data::CFData;
@@ -36,9 +37,30 @@ pub extern "C" fn GeneratePreviewForURL(
     let theme_bytes = include_bytes!("../res/XCodelike.tmTheme");
     let xcode_theme = ThemeSet::load_from_reader(&mut Cursor::new(&theme_bytes[..])).unwrap();
 
-    let ts = ThemeSet::load_defaults();
-    let syntax_set = SyntaxSet::load_defaults_nonewlines();
-    let theme = ts.themes
+    let mut theme_set = ThemeSet::load_defaults();
+    let mut syntax_set = SyntaxSet::load_defaults_nonewlines();
+
+    if let Some(theme_dir) = conf.theme_dir {
+        let directory = theme_dir.to_string();
+        let theme_dir = Path::new(&directory);
+        if let Ok(mut custom_themes) = ThemeSet::load_from_folder(&theme_dir) {
+            theme_set.themes.append(&mut custom_themes.themes);
+        }
+    };
+
+    if let Some(syntax_dir) = conf.syntax_dir {
+        let directory = syntax_dir.to_string();
+        let syntax_dir = Path::new(&directory);
+        if let Ok(mut custom_syntaxes) = SyntaxSet::load_from_folder(&syntax_dir) {
+            for set in custom_syntaxes.syntaxes() {
+                syntax_set.add_syntax(set.clone());
+            }
+            syntax_set.link_syntaxes()
+        }
+    };
+
+    let theme = theme_set
+        .themes
         .get(&conf.theme_name.to_string())
         .unwrap_or(&xcode_theme);
 
