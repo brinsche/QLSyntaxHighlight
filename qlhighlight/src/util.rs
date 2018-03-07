@@ -17,6 +17,10 @@ extern "C" {
     pub static kCFPreferencesAnyHost: CFStringRef;
 }
 
+pub const DEFAULT_THEME_NAME: &'static str = "Xcode-like";
+const DEFAULT_FONT_FAMILY: &'static str = "Menlo, monospace";
+const DEFAULT_FONT_SIZE: &'static str = "11";
+
 const FONT_SIZE: &'static str = "fontSize";
 const FONT_FAMILY: &'static str = "fontFamily";
 const THEME: &'static str = "theme";
@@ -55,17 +59,17 @@ pub fn get_settings() -> Config {
     let font_size = prefs
         .find2(&CFString::new(FONT_SIZE))
         .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or(CFString::new("11"));
+        .unwrap_or(CFString::new(DEFAULT_FONT_SIZE));
 
     let font_family = prefs
         .find2(&CFString::new(FONT_FAMILY))
         .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or(CFString::new("Menlo, monospace"));
+        .unwrap_or(CFString::new(DEFAULT_FONT_FAMILY));
 
     let theme_name = prefs
         .find2(&CFString::new(THEME))
         .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or(CFString::new("InspiredGithub"));
+        .unwrap_or(CFString::new(DEFAULT_THEME_NAME));
 
     let theme_dir = prefs
         .find2(&CFString::new(THEME_DIR))
