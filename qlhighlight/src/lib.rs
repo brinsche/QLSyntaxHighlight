@@ -6,6 +6,7 @@ mod quicklook;
 
 use std::fmt::Write;
 use std::io::Cursor;
+use std::panic::{self, AssertUnwindSafe};
 use std::path::Path;
 
 use core_foundation::base::{OSStatus, TCFType};
@@ -77,8 +78,50 @@ pub extern "C" fn GeneratePreviewForURL(
         c.r, c.g, c.b
     );
     write!(buffer, "<head><style>{}</style></head>", style);
-    let html = highlighted_snippet_for_file(path, &syntax_set, theme).unwrap();
-    write!(buffer, "{}", html);
+
+    let first_try = panic::catch_unwind(AssertUnwindSafe(|| {
+        if let Ok(html) = highlighted_snippet_for_file(&path, &syntax_set, theme) {
+            write!(buffer, "{}", html);
+        } else {
+            write!(
+                buffer,
+                "<pre><span style=\"color:#{:02x}{:02x}{:02x}\">{}</span></pre>\n",
+                c.r, c.g, c.b, "IOError encountered."
+            );
+        };
+    }));
+
+    if first_try.is_err() {
+        // Force plaintext syntax after first try panicked
+        let mut plain_syntax = SyntaxSet::new();
+        plain_syntax.load_plain_text_syntax();
+        plain_syntax.link_syntaxes();
+
+        let c = Color {
+            r: 255,
+            g: 0,
+            b: 0,
+            a: 255,
+        };
+
+        write!(
+            buffer,
+            "<pre><span style=\"color:#{:02x}{:02x}{:02x}\">{}</span></pre>\n",
+            c.r, c.g, c.b, "Highlighting failed, syntax may be invalid!"
+        );
+
+        let _retry = panic::catch_unwind(AssertUnwindSafe(|| {
+            if let Ok(html) = highlighted_snippet_for_file(&path, &plain_syntax, &theme) {
+                write!(buffer, "{}", html);
+            } else {
+                write!(
+                    buffer,
+                    "<pre><span style=\"color:#{:02x}{:02x}{:02x}\">{}</span></pre>\n",
+                    c.r, c.g, c.b, "IOError encountered."
+                );
+            };
+        }));
+    }
 
     let data = CFData::from_buffer(buffer.as_bytes());
 
