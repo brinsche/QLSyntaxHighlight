@@ -6,6 +6,8 @@ mod quicklook;
 
 use std::fmt::Write;
 use std::io::Cursor;
+use std::io::prelude::*;
+use std::fs::File;
 use std::panic::{self, AssertUnwindSafe};
 use std::path::Path;
 
@@ -16,7 +18,7 @@ use core_foundation::string::CFStringRef;
 use core_foundation::dictionary::CFDictionaryRef;
 
 use syntect::highlighting::{Color, ThemeSet};
-use syntect::html::highlighted_snippet_for_file;
+use syntect::html::highlighted_snippet_for_string;
 use syntect::parsing::SyntaxSet;
 
 use quicklook::QLPreviewRequestRef;
@@ -69,34 +71,38 @@ pub extern "C" fn GeneratePreviewForURL(
         "pre {{ font-size: {}px; font-family: {}; }}",
         conf.font_size, conf.font_family
     );
-    let c = theme.settings.background.unwrap_or(Color::WHITE);
+    let bg = theme.settings.background.unwrap_or(Color::WHITE);
+
+    let mut filecontent: Vec<u8> = Vec::new();
+    let mut file = File::open(&path).expect("Unable to open the file");
+    file.read_to_end(&mut filecontent)
+        .expect("Unable to read the file");
+
+    let content = String::from_utf8_lossy(&filecontent);
 
     let mut buffer = String::new();
     write!(
         buffer,
         "<body style=\"background-color:#{:02x}{:02x}{:02x};\">\n",
-        c.r, c.g, c.b
+        bg.r, bg.g, bg.b
     );
     write!(buffer, "<head><style>{}</style></head>", style);
 
     let first_try = panic::catch_unwind(AssertUnwindSafe(|| {
-        if let Ok(html) = highlighted_snippet_for_file(&path, &syntax_set, theme) {
-            write!(buffer, "{}", html);
-        } else {
-            write!(
-                buffer,
-                "<pre><span style=\"color:#{:02x}{:02x}{:02x}\">{}</span></pre>\n",
-                c.r, c.g, c.b, "IOError encountered."
-            );
+        let syntax = match syntax_set.find_syntax_for_file(&path) {
+            Ok(found) => match found {
+                Some(syntax) => syntax,
+                None => syntax_set.find_syntax_plain_text(),
+            },
+            Err(_) => syntax_set.find_syntax_plain_text(),
         };
+
+        let html = highlighted_snippet_for_string(&content, &syntax, theme);
+        write!(buffer, "{}", html);
     }));
 
     if first_try.is_err() {
         // Force plaintext syntax after first try panicked
-        let mut plain_syntax = SyntaxSet::new();
-        plain_syntax.load_plain_text_syntax();
-        plain_syntax.link_syntaxes();
-
         let c = Color {
             r: 255,
             g: 0,
@@ -111,15 +117,12 @@ pub extern "C" fn GeneratePreviewForURL(
         );
 
         let _retry = panic::catch_unwind(AssertUnwindSafe(|| {
-            if let Ok(html) = highlighted_snippet_for_file(&path, &plain_syntax, &theme) {
-                write!(buffer, "{}", html);
-            } else {
-                write!(
-                    buffer,
-                    "<pre><span style=\"color:#{:02x}{:02x}{:02x}\">{}</span></pre>\n",
-                    c.r, c.g, c.b, "IOError encountered."
-                );
-            };
+            let html = highlighted_snippet_for_string(
+                &content,
+                &syntax_set.find_syntax_plain_text(),
+                &theme,
+            );
+            write!(buffer, "{}", html);
         }));
     }
 
