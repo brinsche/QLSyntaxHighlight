@@ -92,7 +92,10 @@ pub extern "C" fn GeneratePreviewForURL(
         let syntax = match syntax_set.find_syntax_for_file(&path) {
             Ok(found) => match found {
                 Some(syntax) => syntax,
-                None => syntax_set.find_syntax_plain_text(),
+                None => path.file_stem()
+                    .and_then(|stem| stem.to_str())
+                    .and_then(|filename| syntax_set.find_syntax_by_token(filename))
+                    .unwrap_or_else(|| syntax_set.find_syntax_plain_text()),
             },
             Err(_) => syntax_set.find_syntax_plain_text(),
         };
