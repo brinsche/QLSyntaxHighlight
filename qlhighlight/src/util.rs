@@ -6,7 +6,7 @@ use core_foundation::base::{CFType, TCFType};
 use core_foundation::string::{CFString, CFStringRef};
 use core_foundation::dictionary::{CFDictionary, CFDictionaryRef};
 
-use syntect::highlighting::{Theme, ThemeSet};
+use syntect::highlighting::{Color, Theme, ThemeSet};
 use syntect::parsing::SyntaxSet;
 
 extern "C" {
@@ -32,6 +32,13 @@ const FONT_FAMILY: &'static str = "fontFamily";
 const THEME: &'static str = "theme";
 const THEME_DIR: &'static str = "themeDirectory";
 const SYNTAX_DIR: &'static str = "syntaxDirectory";
+
+pub const RED: Color = Color {
+    r: 255,
+    g: 0,
+    b: 0,
+    a: 255,
+};
 
 #[derive(Debug)]
 pub struct Config {

@@ -7,10 +7,10 @@ use syntect::highlighting::Color;
 use syntect::html::highlighted_snippet_for_string;
 
 use util::Config;
+use util::RED;
 
 pub fn apply_style(input: &str, conf: &Config) -> String {
     let mut buffer = String::new();
-
     let bg = conf.theme.settings.background.unwrap_or(Color::WHITE);
     buffer.push_str(&format!(
         "<body style=\"background-color:#{:02x}{:02x}{:02x};\">\n",
@@ -21,7 +21,6 @@ pub fn apply_style(input: &str, conf: &Config) -> String {
         conf.font_size, conf.font_family
     );
     buffer.push_str(&format!("<head><style>{}</style></head>", style));
-
     buffer.push_str(input);
     buffer
 }
@@ -46,22 +45,14 @@ pub fn highlight_file(file_path: &Path, conf: &Config) -> Result<String, ::std::
             },
             Err(_) => conf.syntax_set.find_syntax_plain_text(),
         };
-
         html = highlighted_snippet_for_string(&content, &syntax, &conf.theme);
     }));
 
     if first_try.is_err() {
         // Force plaintext syntax after first try panicked
-        let c = Color {
-            r: 255,
-            g: 0,
-            b: 0,
-            a: 255,
-        };
-
         html.push_str(&format!(
             "<pre><span style=\"color:#{:02x}{:02x}{:02x}\">{}</span></pre>\n",
-            c.r, c.g, c.b, "Highlighting failed, syntax may be invalid!"
+            RED.r, RED.g, RED.b, "Highlighting failed, syntax may be invalid!"
         ));
 
         let _retry = panic::catch_unwind(AssertUnwindSafe(|| {
@@ -73,4 +64,13 @@ pub fn highlight_file(file_path: &Path, conf: &Config) -> Result<String, ::std::
         }));
     }
     Ok(apply_style(&html, conf))
+}
+
+pub fn format_err(cause: &str, conf: &Config) -> String {
+    let mut error = String::new();
+    error.push_str(&format!(
+        "<pre><span style=\"color:#{:02x}{:02x}{:02x}\">{}</span></pre>\n",
+        RED.r, RED.g, RED.b, cause
+    ));
+    apply_style(&error, &conf)
 }

@@ -26,7 +26,11 @@ pub extern "C" fn GeneratePreviewForURL(
     let url = unsafe { CFURL::wrap_under_get_rule(url) };
     let path = url.to_path().unwrap();
     let conf = util::get_settings();
-    let buffer = highlight::highlight_file(&path, &conf).unwrap();
+
+    let buffer = match highlight::highlight_file(&path, &conf) {
+        Ok(html) => html,
+        Err(_) => highlight::format_err("Error reading file.", &conf),
+    };
 
     let data = CFData::from_buffer(buffer.as_bytes());
 
