@@ -11,3 +11,7 @@ crate-type = ["staticlib"]
 core-foundation = "0.5"
 core-foundation-sys = "0.5"
 syntect = "2"
+hexplay = "0.2"
+
+[profile.release]
+lto = true

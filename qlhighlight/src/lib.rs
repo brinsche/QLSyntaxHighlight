@@ -1,4 +1,5 @@
 extern crate core_foundation;
+extern crate hexplay;
 extern crate syntect;
 
 mod highlight;
@@ -8,28 +9,41 @@ mod quicklook;
 use core_foundation::base::{OSStatus, TCFType};
 use core_foundation::data::CFData;
 use core_foundation::url::{CFURLRef, CFURL};
-use core_foundation::string::CFStringRef;
+use core_foundation::string::{CFString, CFStringRef};
 use core_foundation::dictionary::CFDictionaryRef;
-
+use highlight::determine_file_type;
+use highlight::FileType::*;
 use quicklook::QLPreviewRequestRef;
 use quicklook::QLPreviewRequestSetDataRepresentation;
 use quicklook::kUTTypeHTML;
+use quicklook::kUTTypePlainText;
+use util::read_file_to_string;
 
 #[no_mangle]
 pub extern "C" fn GeneratePreviewForURL(
     _this_interface: usize, //???
     preview: QLPreviewRequestRef,
     url: CFURLRef,
-    _content_type_uti: CFStringRef,
+    content_type_uti: CFStringRef,
     options: CFDictionaryRef,
 ) -> OSStatus {
     let url = unsafe { CFURL::wrap_under_get_rule(url) };
+    let content_type_uti = unsafe { CFString::wrap_under_get_rule(content_type_uti) };
+
     let path = url.to_path().unwrap();
     let conf = util::get_settings();
 
-    let buffer = match highlight::highlight_file(&path, &conf) {
-        Ok(html) => html,
-        Err(_) => highlight::format_err("Error reading file.", &conf),
+
+    let buffer = if let Ok(buffer) = read_file_to_string(&path) {
+        match determine_file_type(content_type_uti) {
+            Binary => highlight::hex_highlight_file(buffer, &conf),
+            Syntax => match highlight::syntax_highlight_file(&buffer, &path, &conf) {
+                Ok(html) => html,
+                Err(_) => highlight::format_err("Error reading file.", &conf),
+            },
+        }
+    } else {
+        highlight::format_err("Error reading file.", &conf)
     };
 
     let data = CFData::from_buffer(buffer.as_bytes());

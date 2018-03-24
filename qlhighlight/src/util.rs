@@ -1,4 +1,6 @@
+use std::io::prelude::*;
 use std::io::Cursor;
+use std::fs::File;
 use std::path::Path;
 
 use core_foundation::array::{CFArray, CFArrayRef};
@@ -128,4 +130,11 @@ pub fn get_settings() -> Config {
         theme,
         syntax_set,
     }
+}
+
+pub fn read_file_to_string(file_path: &Path) -> Result<Vec<u8>, ::std::io::Error> {
+    let mut content: Vec<u8> = Vec::new();
+    let mut file = File::open(&file_path)?;
+    file.read_to_end(&mut content)?;
+    Ok(content)
 }
