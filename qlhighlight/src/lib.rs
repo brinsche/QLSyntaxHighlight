@@ -34,16 +34,15 @@ pub extern "C" fn GeneratePreviewForURL(
     let conf = util::get_settings();
 
 
-    let buffer = if let Ok(buffer) = read_file_to_string(&path) {
-        match determine_file_type(content_type_uti) {
+    let buffer = match read_file_to_string(&path) {
+        Ok(buffer) => match determine_file_type(content_type_uti) {
             Binary => highlight::hex_highlight_file(buffer, &conf),
             Syntax => match highlight::syntax_highlight_file(&buffer, &path, &conf) {
                 Ok(html) => html,
                 Err(_) => highlight::format_err("Error reading file.", &conf),
             },
-        }
-    } else {
-        highlight::format_err("Error reading file.", &conf)
+        },
+        Err(_) => highlight::format_err("Error reading file.", &conf),
     };
 
     let data = CFData::from_buffer(buffer.as_bytes());
