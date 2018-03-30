@@ -20,8 +20,8 @@ pub fn determine_file_type(content_type_uti: CFString) -> FileType {
         | "dyn.ah62d4rv4ge81g52" // .so
         | "dyn.ah62d4rv4ge81e5dmqk" // .rlib
         | "com.apple.mach-o-dylib" // .dylib
-        | "com.microsoft.windows-​executable" // .exe
-        | "com.microsoft.windows-​dynamic-link-library" // .dll
+        | "com.microsoft.windows-executable" // .exe
+        | "com.microsoft.windows-dynamic-link-library" // .dll
         | "com.sun.java-archive" // .jar
         | "com.sun.java-class" // .class
         | "public.executable"
