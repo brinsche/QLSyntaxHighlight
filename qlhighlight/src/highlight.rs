@@ -1,16 +1,20 @@
+use std::io::Cursor;
 use std::panic::{self, AssertUnwindSafe};
 use std::path::Path;
 
 use core_foundation::string::CFString;
 use hexplay::HexViewBuilder;
+use plist::{Plist, xml::EventWriter};
 use syntect::highlighting::Color;
 use syntect::html::highlighted_snippet_for_string;
+use syntect::parsing::SyntaxDefinition;
 
 use util::Config;
 use util::RED;
 
 pub enum FileType {
     Binary,
+    Plist,
     Syntax,
 }
 
@@ -27,6 +31,7 @@ pub fn determine_file_type(content_type_uti: CFString) -> FileType {
         | "public.executable"
         | "public.object-code" // .o
         | "public.unix-executable" => FileType::Binary,
+        "com.apple.property-list" => FileType::Plist,
         _ => FileType::Syntax,
     }
 }
@@ -57,17 +62,7 @@ pub fn syntax_highlight_file(
     let mut html = String::new();
 
     let first_try = panic::catch_unwind(AssertUnwindSafe(|| {
-        let syntax = match conf.syntax_set.find_syntax_for_file(&file_path) {
-            Ok(found) => match found {
-                Some(syntax) => syntax,
-                None => file_path
-                    .file_stem()
-                    .and_then(|stem| stem.to_str())
-                    .and_then(|filename| conf.syntax_set.find_syntax_by_token(filename))
-                    .unwrap_or_else(|| conf.syntax_set.find_syntax_plain_text()),
-            },
-            Err(_) => conf.syntax_set.find_syntax_plain_text(),
-        };
+        let syntax = find_syntax_for_file(&file_path, conf);
         html = highlighted_snippet_for_string(&content, &syntax, &conf.theme);
     }));
 
@@ -95,6 +90,46 @@ pub fn hex_highlight_file(buf: Vec<u8>, conf: &Config) -> String {
         .finish();
     let result = format!("{}", view);
     apply_style(&result, conf)
+}
+
+pub fn highlight_plist(buf: &Vec<u8>, conf: &Config) -> String {
+    let plist = match Plist::read(&mut Cursor::new(&buf[..])) {
+        Ok(p) => p,
+        Err(_) => return format_err("Error parsing .plist", conf),   
+    };
+    let mut plist_str = Cursor::new(Vec::new());
+    {
+        let mut writer = EventWriter::new(&mut plist_str);
+
+        for item in plist.into_events() {
+            match writer.write(&item) {
+                Ok(_) => (),
+                Err(_) => return format_err("Error parsing .plist", conf),
+            };
+        }
+    }
+    let buf = match String::from_utf8(plist_str.into_inner()) {
+        Ok(s) => s,
+        Err(_) => return format_err("Invalid UTF-8 in .plist", conf),
+    };
+
+    let xml_syntax = conf.syntax_set.find_syntax_by_name("XML").unwrap();
+    let html = highlighted_snippet_for_string(&buf, &xml_syntax, &conf.theme);
+    apply_style(&html, conf)
+}
+
+fn find_syntax_for_file<'a>(file_path: &Path, conf: &'a Config) -> &'a SyntaxDefinition {
+    match conf.syntax_set.find_syntax_for_file(&file_path) {
+        Ok(found) => match found {
+            Some(syntax) => syntax,
+            None => file_path
+                .file_stem()
+                .and_then(|stem| stem.to_str())
+                .and_then(|filename| conf.syntax_set.find_syntax_by_token(filename))
+                .unwrap_or_else(|| conf.syntax_set.find_syntax_plain_text()),
+        },
+        Err(_) => conf.syntax_set.find_syntax_plain_text(),
+    }
 }
 
 pub fn format_err(cause: &str, conf: &Config) -> String {

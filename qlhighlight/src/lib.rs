@@ -1,5 +1,6 @@
 extern crate core_foundation;
 extern crate hexplay;
+extern crate plist;
 extern crate syntect;
 
 mod highlight;
@@ -37,6 +38,7 @@ pub extern "C" fn GeneratePreviewForURL(
     let buffer = match read_file_to_string(&path) {
         Ok(buffer) => match determine_file_type(content_type_uti) {
             Binary => highlight::hex_highlight_file(buffer, &conf),
+            Plist => highlight::highlight_plist(&buffer, &conf),
             Syntax => match highlight::syntax_highlight_file(&buffer, &path, &conf) {
                 Ok(html) => html,
                 Err(_) => highlight::format_err("Error reading file.", &conf),
