@@ -1,12 +1,12 @@
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::Cursor;
-use std::fs::File;
 use std::path::Path;
 
 use core_foundation::array::{CFArray, CFArrayRef};
 use core_foundation::base::{CFType, TCFType};
-use core_foundation::string::{CFString, CFStringRef};
 use core_foundation::dictionary::{CFDictionary, CFDictionaryRef};
+use core_foundation::string::{CFString, CFStringRef};
 
 use syntect::highlighting::{Color, Theme, ThemeSet};
 use syntect::parsing::SyntaxSet;
@@ -25,15 +25,15 @@ extern "C" {
     pub static kCFPreferencesAnyHost: CFStringRef;
 }
 
-pub const DEFAULT_THEME_NAME: &'static str = "Xcode-like";
-const DEFAULT_FONT_FAMILY: &'static str = "Menlo, monospace";
-const DEFAULT_FONT_SIZE: &'static str = "11";
+pub const DEFAULT_THEME_NAME: &str = "Xcode-like";
+const DEFAULT_FONT_FAMILY: &str = "Menlo, monospace";
+const DEFAULT_FONT_SIZE: &str = "11";
 
-const FONT_SIZE: &'static str = "fontSize";
-const FONT_FAMILY: &'static str = "fontFamily";
-const THEME: &'static str = "theme";
-const THEME_DIR: &'static str = "themeDirectory";
-const SYNTAX_DIR: &'static str = "syntaxDirectory";
+const FONT_SIZE: &str = "fontSize";
+const FONT_FAMILY: &str = "fontFamily";
+const THEME: &str = "theme";
+const THEME_DIR: &str = "themeDirectory";
+const SYNTAX_DIR: &str = "syntaxDirectory";
 
 pub const RED: Color = Color {
     r: 255,
@@ -73,17 +73,17 @@ pub fn get_settings() -> Config {
     let font_size = prefs
         .find2(&CFString::new(FONT_SIZE))
         .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or(CFString::new(DEFAULT_FONT_SIZE));
+        .unwrap_or_else(|| CFString::new(DEFAULT_FONT_SIZE));
 
     let font_family = prefs
         .find2(&CFString::new(FONT_FAMILY))
         .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or(CFString::new(DEFAULT_FONT_FAMILY));
+        .unwrap_or_else(|| CFString::new(DEFAULT_FONT_FAMILY));
 
     let theme_name = prefs
         .find2(&CFString::new(THEME))
         .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or(CFString::new(DEFAULT_THEME_NAME));
+        .unwrap_or_else(|| CFString::new(DEFAULT_THEME_NAME));
 
     let theme_dir = prefs
         .find2(&CFString::new(THEME_DIR))
@@ -107,7 +107,7 @@ pub fn get_settings() -> Config {
     if let Some(syntax_dir) = syntax_dir {
         let directory = syntax_dir.to_string();
         let syntax_dir = Path::new(&directory);
-        if let Ok(mut custom_syntaxes) = SyntaxSet::load_from_folder(&syntax_dir) {
+        if let Ok(custom_syntaxes) = SyntaxSet::load_from_folder(&syntax_dir) {
             for set in custom_syntaxes.syntaxes() {
                 syntax_set.add_syntax(set.clone());
             }
