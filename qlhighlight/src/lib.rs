@@ -1,23 +1,17 @@
-extern crate core_foundation;
-extern crate hexplay;
-extern crate plist;
-extern crate syntect;
-
 mod highlight;
-mod util;
 mod quicklook;
+mod util;
 
 use core_foundation::base::{OSStatus, TCFType};
 use core_foundation::data::CFData;
-use core_foundation::url::{CFURLRef, CFURL};
-use core_foundation::string::{CFString, CFStringRef};
 use core_foundation::dictionary::CFDictionaryRef;
+use core_foundation::string::{CFString, CFStringRef};
+use core_foundation::url::{CFURLRef, CFURL};
 use highlight::determine_file_type;
 use highlight::FileType::*;
+use quicklook::kUTTypeHTML;
 use quicklook::QLPreviewRequestRef;
 use quicklook::QLPreviewRequestSetDataRepresentation;
-use quicklook::kUTTypeHTML;
-use quicklook::kUTTypePlainText;
 use util::read_file_to_string;
 
 #[no_mangle]
@@ -34,10 +28,9 @@ pub extern "C" fn GeneratePreviewForURL(
     let path = url.to_path().unwrap();
     let conf = util::get_settings();
 
-
     let buffer = match read_file_to_string(&path) {
         Ok(buffer) => match determine_file_type(content_type_uti) {
-            Binary => highlight::hex_highlight_file(buffer, &conf),
+            Binary => highlight::hex_highlight_file(&buffer, &conf),
             Plist => highlight::highlight_plist(&buffer, &conf),
             Syntax => match highlight::syntax_highlight_file(&buffer, &path, &conf) {
                 Ok(html) => html,

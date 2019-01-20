@@ -9,8 +9,8 @@ use syntect::highlighting::Color;
 use syntect::html::highlighted_snippet_for_string;
 use syntect::parsing::SyntaxDefinition;
 
-use util::Config;
-use util::RED;
+use crate::util::Config;
+use crate::util::RED;
 
 pub enum FileType {
     Binary,
@@ -54,7 +54,7 @@ pub fn apply_style(input: &str, conf: &Config) -> String {
 }
 
 pub fn syntax_highlight_file(
-    buf: &Vec<u8>,
+    buf: &[u8],
     file_path: &Path,
     conf: &Config,
 ) -> Result<String, ::std::io::Error> {
@@ -84,7 +84,7 @@ pub fn syntax_highlight_file(
     Ok(apply_style(&html, conf))
 }
 
-pub fn hex_highlight_file(buf: Vec<u8>, conf: &Config) -> String {
+pub fn hex_highlight_file(buf: &[u8], conf: &Config) -> String {
     let view = HexViewBuilder::new(&buf)
         .codepage(::hexplay::CODEPAGE_ASCII)
         .finish();
@@ -92,7 +92,7 @@ pub fn hex_highlight_file(buf: Vec<u8>, conf: &Config) -> String {
     apply_style(&result, conf)
 }
 
-pub fn highlight_plist(buf: &Vec<u8>, conf: &Config) -> String {
+pub fn highlight_plist(buf: &[u8], conf: &Config) -> String {
     let plist = match Plist::read(&mut Cursor::new(&buf[..])) {
         Ok(p) => p,
         Err(_) => return format_err("Error parsing .plist", conf),
