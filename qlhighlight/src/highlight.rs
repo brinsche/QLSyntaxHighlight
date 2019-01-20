@@ -4,7 +4,7 @@ use std::path::Path;
 
 use core_foundation::string::CFString;
 use hexplay::HexViewBuilder;
-use plist::{Plist, xml::EventWriter};
+use plist::{xml::EventWriter, Plist};
 use syntect::highlighting::Color;
 use syntect::html::highlighted_snippet_for_string;
 use syntect::parsing::SyntaxDefinition;
@@ -95,7 +95,7 @@ pub fn hex_highlight_file(buf: Vec<u8>, conf: &Config) -> String {
 pub fn highlight_plist(buf: &Vec<u8>, conf: &Config) -> String {
     let plist = match Plist::read(&mut Cursor::new(&buf[..])) {
         Ok(p) => p,
-        Err(_) => return format_err("Error parsing .plist", conf),   
+        Err(_) => return format_err("Error parsing .plist", conf),
     };
     let mut plist_str = Cursor::new(Vec::new());
     {
