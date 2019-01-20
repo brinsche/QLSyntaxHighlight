@@ -12,7 +12,7 @@ crate-type = ["staticlib"]
 core-foundation = "0.6"
 hexplay = { git = "https://github.com/Memorion/hexplay.git", branch = "html-hack" }
 syntect = "2"
-plist = { version = "0.2", default-features = false }
+plist = { version = "0.4", default-features = false }
 
 [profile.release]
 lto = true
