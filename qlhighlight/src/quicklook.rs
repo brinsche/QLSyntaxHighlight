@@ -1,7 +1,7 @@
 use core_foundation::base::Boolean;
 use core_foundation::data::CFDataRef;
-use core_foundation::string::CFStringRef;
 use core_foundation::dictionary::CFDictionaryRef;
+use core_foundation::string::CFStringRef;
 
 #[allow(dead_code)]
 extern "C" {
