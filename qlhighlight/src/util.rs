@@ -4,7 +4,7 @@ use std::io::Cursor;
 use std::path::Path;
 
 use core_foundation::array::{CFArray, CFArrayRef};
-use core_foundation::base::{CFType, TCFType};
+use core_foundation::base::{CFType, TCFType, ToVoid};
 use core_foundation::dictionary::{CFDictionary, CFDictionaryRef};
 use core_foundation::string::{CFString, CFStringRef};
 
@@ -71,27 +71,27 @@ pub fn get_settings() -> Config {
     let prefs: CFDictionary = unsafe { CFDictionary::wrap_under_get_rule(prefs) };
 
     let font_size = prefs
-        .find2(&CFString::new(FONT_SIZE))
-        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
+        .find(CFString::from_static_string(FONT_SIZE).to_void())
+        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(*ptr).downcast::<CFString>() })
         .unwrap_or_else(|| CFString::new(DEFAULT_FONT_SIZE));
 
     let font_family = prefs
-        .find2(&CFString::new(FONT_FAMILY))
-        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or_else(|| CFString::new(DEFAULT_FONT_FAMILY));
+        .find(CFString::from_static_string(FONT_FAMILY).to_void())
+        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(*ptr).downcast::<CFString>() })
+        .unwrap_or_else(|| CFString::from_static_string(DEFAULT_FONT_FAMILY));
 
     let theme_name = prefs
-        .find2(&CFString::new(THEME))
-        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() })
-        .unwrap_or_else(|| CFString::new(DEFAULT_THEME_NAME));
+        .find(CFString::from_static_string(THEME).to_void())
+        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(*ptr).downcast::<CFString>() })
+        .unwrap_or_else(|| CFString::from_static_string(DEFAULT_THEME_NAME));
 
     let theme_dir = prefs
-        .find2(&CFString::new(THEME_DIR))
-        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() });
+        .find(CFString::from_static_string(THEME_DIR).to_void())
+        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(*ptr).downcast::<CFString>() });
 
     let syntax_dir = prefs
-        .find2(&CFString::new(SYNTAX_DIR))
-        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(ptr).downcast::<CFString>() });
+        .find(CFString::from_static_string(SYNTAX_DIR).to_void())
+        .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(*ptr).downcast::<CFString>() });
 
     let mut theme_set = ThemeSet::load_defaults();
     let mut syntax_set = SyntaxSet::load_defaults_nonewlines();
