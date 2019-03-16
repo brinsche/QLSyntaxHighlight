@@ -1,0 +1,105 @@
+diff --git a/QLSyntaxHighlight.xcodeproj/xcshareddata/xcschemes/QLSyntaxHighlight.xcscheme b/QLSyntaxHighlight.xcodeproj/xcshareddata/xcschemes/QLSyntaxHighlight.xcscheme
+new file mode 100644
+index 0000000..36cd421
+--- /dev/null
++++ b/QLSyntaxHighlight.xcodeproj/xcshareddata/xcschemes/QLSyntaxHighlight.xcscheme
+@@ -0,0 +1,99 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<Scheme
++   LastUpgradeVersion = "1010"
++   version = "1.7">
++   <BuildAction
++      parallelizeBuildables = "YES"
++      buildImplicitDependencies = "YES">
++      <PostActions>
++         <ExecutionAction
++            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
++            <ActionContent
++               title = "Run Script"
++               scriptText = "rm -rf ~/Library/QuickLook/$FULL_PRODUCT_NAME&#10;yes | cp -rf $TARGET_BUILD_DIR/$FULL_PRODUCT_NAME ~/Library/QuickLook/&#10;/usr/bin/qlmanage -r&#10;"
++               shellToInvoke = "/bin/sh">
++               <EnvironmentBuildable>
++                  <BuildableReference
++                     BuildableIdentifier = "primary"
++                     BlueprintIdentifier = "8C32DD1220474309002C4685"
++                     BuildableName = "QLSyntaxHighlight.qlgenerator"
++                     BlueprintName = "QLSyntaxHighlight"
++                     ReferencedContainer = "container:QLSyntaxHighlight.xcodeproj">
++                  </BuildableReference>
++               </EnvironmentBuildable>
++            </ActionContent>
++         </ExecutionAction>
++      </PostActions>
++      <BuildActionEntries>
++         <BuildActionEntry
++            buildForTesting = "YES"
++            buildForRunning = "YES"
++            buildForProfiling = "YES"
++            buildForArchiving = "YES"
++            buildForAnalyzing = "YES">
++            <BuildableReference
++               BuildableIdentifier = "primary"
++               BlueprintIdentifier = "8C32DD1220474309002C4685"
++               BuildableName = "QLSyntaxHighlight.qlgenerator"
++               BlueprintName = "QLSyntaxHighlight"
++               ReferencedContainer = "container:QLSyntaxHighlight.xcodeproj">
++            </BuildableReference>
++         </BuildActionEntry>
++      </BuildActionEntries>
++   </BuildAction>
++   <TestAction
++      buildConfiguration = "Debug"
++      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
++      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
++      shouldUseLaunchSchemeArgsEnv = "YES">
++      <Testables>
++      </Testables>
++      <AdditionalOptions>
++      </AdditionalOptions>
++   </TestAction>
++   <LaunchAction
++      buildConfiguration = "Release"
++      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
++      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
++      launchStyle = "0"
++      useCustomWorkingDirectory = "NO"
++      ignoresPersistentStateOnLaunch = "NO"
++      debugDocumentVersioning = "YES"
++      debugServiceExtension = "internal"
++      allowLocationSimulation = "YES">
++      <MacroExpansion>
++         <BuildableReference
++            BuildableIdentifier = "primary"
++            BlueprintIdentifier = "8C32DD1220474309002C4685"
++            BuildableName = "QLSyntaxHighlight.qlgenerator"
++            BlueprintName = "QLSyntaxHighlight"
++            ReferencedContainer = "container:QLSyntaxHighlight.xcodeproj">
++         </BuildableReference>
++      </MacroExpansion>
++      <AdditionalOptions>
++      </AdditionalOptions>
++   </LaunchAction>
++   <ProfileAction
++      buildConfiguration = "Release"
++      shouldUseLaunchSchemeArgsEnv = "YES"
++      savedToolIdentifier = ""
++      useCustomWorkingDirectory = "NO"
++      debugDocumentVersioning = "YES">
++      <MacroExpansion>
++         <BuildableReference
++            BuildableIdentifier = "primary"
++            BlueprintIdentifier = "8C32DD1220474309002C4685"
++            BuildableName = "QLSyntaxHighlight.qlgenerator"
++            BlueprintName = "QLSyntaxHighlight"
++            ReferencedContainer = "container:QLSyntaxHighlight.xcodeproj">
++         </BuildableReference>
++      </MacroExpansion>
++   </ProfileAction>
++   <AnalyzeAction
++      buildConfiguration = "Debug">
++   </AnalyzeAction>
++   <ArchiveAction
++      buildConfiguration = "Release"
++      revealArchiveInOrganizer = "YES">
++   </ArchiveAction>
++</Scheme>
