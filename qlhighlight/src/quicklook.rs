@@ -1,7 +1,7 @@
 use core_foundation::base::Boolean;
 use core_foundation::data::CFDataRef;
 use core_foundation::dictionary::CFDictionaryRef;
-use core_foundation::string::CFStringRef;
+use core_foundation::string::{CFString, CFStringRef};
 
 #[allow(dead_code)]
 extern "C" {
@@ -16,6 +16,8 @@ extern "C" {
         properties: CFDictionaryRef,
     );
     pub fn QLPreviewRequestIsCancelled(preview: QLPreviewRequestRef) -> Boolean;
+    #[allow(improper_ctypes)]
+    pub fn CFLog(level: usize, log: CFString);
 }
 
 #[repr(C)]

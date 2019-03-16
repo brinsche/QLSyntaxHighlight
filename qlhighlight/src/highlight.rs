@@ -1,16 +1,14 @@
-use std::io::Cursor;
-use std::panic::{self, AssertUnwindSafe};
-use std::path::Path;
-
+use crate::util::Config;
+use crate::util::RED;
 use core_foundation::string::CFString;
 use hexplay::HexViewBuilder;
 use plist::{stream::XmlWriter, Value};
+use std::io::Cursor;
+use std::panic::{self, AssertUnwindSafe};
+use std::path::Path;
 use syntect::highlighting::Color;
-use syntect::html::highlighted_snippet_for_string;
-use syntect::parsing::SyntaxDefinition;
-
-use crate::util::Config;
-use crate::util::RED;
+use syntect::html::highlighted_html_for_string;
+use syntect::parsing::SyntaxReference;
 
 pub enum FileType {
     Binary,
@@ -63,7 +61,7 @@ pub fn syntax_highlight_file(
 
     let first_try = panic::catch_unwind(AssertUnwindSafe(|| {
         let syntax = find_syntax_for_file(&file_path, conf);
-        html = highlighted_snippet_for_string(&content, &syntax, &conf.theme);
+        html = highlighted_html_for_string(&content, &conf.syntax_set, &syntax, &conf.theme);
     }));
 
     if first_try.is_err() {
@@ -74,8 +72,9 @@ pub fn syntax_highlight_file(
         ));
 
         let _retry = panic::catch_unwind(AssertUnwindSafe(|| {
-            html.push_str(&highlighted_snippet_for_string(
+            html.push_str(&highlighted_html_for_string(
                 &content,
+                &conf.syntax_set,
                 &conf.syntax_set.find_syntax_plain_text(),
                 &conf.theme,
             ));
@@ -114,22 +113,15 @@ pub fn highlight_plist(buf: &[u8], conf: &Config) -> String {
     };
 
     let xml_syntax = conf.syntax_set.find_syntax_by_name("XML").unwrap();
-    let html = highlighted_snippet_for_string(&buf, &xml_syntax, &conf.theme);
+    let html = highlighted_html_for_string(&buf, &conf.syntax_set, &xml_syntax, &conf.theme);
     apply_style(&html, conf)
 }
 
-fn find_syntax_for_file<'a>(file_path: &Path, conf: &'a Config) -> &'a SyntaxDefinition {
-    match conf.syntax_set.find_syntax_for_file(&file_path) {
-        Ok(found) => match found {
-            Some(syntax) => syntax,
-            None => file_path
-                .file_stem()
-                .and_then(|stem| stem.to_str())
-                .and_then(|filename| conf.syntax_set.find_syntax_by_token(filename))
-                .unwrap_or_else(|| conf.syntax_set.find_syntax_plain_text()),
-        },
-        Err(_) => conf.syntax_set.find_syntax_plain_text(),
-    }
+fn find_syntax_for_file<'a>(file_path: &Path, conf: &'a Config) -> &'a SyntaxReference {
+    conf.syntax_set
+        .find_syntax_for_file(file_path)
+        .unwrap() // for IO errors, you may want to use try!() or another plain text fallback
+        .unwrap_or_else(|| conf.syntax_set.find_syntax_plain_text())
 }
 
 pub fn format_err(cause: &str, conf: &Config) -> String {

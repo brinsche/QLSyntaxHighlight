@@ -11,7 +11,7 @@ crate-type = ["staticlib"]
 [dependencies]
 core-foundation = "0.6"
 hexplay = { git = "https://github.com/Memorion/hexplay.git", branch = "html-hack" }
-syntect = "2"
+syntect = "3.2"
 plist = { version = "0.4", default-features = false }
 
 [profile.release]

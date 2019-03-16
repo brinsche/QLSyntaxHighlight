@@ -1,13 +1,12 @@
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::Cursor;
-use std::path::Path;
-
+use crate::quicklook::CFLog;
 use core_foundation::array::{CFArray, CFArrayRef};
 use core_foundation::base::{CFType, TCFType, ToVoid};
 use core_foundation::dictionary::{CFDictionary, CFDictionaryRef};
 use core_foundation::string::{CFString, CFStringRef};
-
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::Cursor;
+use std::path::Path;
 use syntect::highlighting::{Color, Theme, ThemeSet};
 use syntect::parsing::SyntaxSet;
 
@@ -94,26 +93,25 @@ pub fn get_settings() -> Config {
         .and_then(|ptr| unsafe { CFType::wrap_under_create_rule(*ptr).downcast::<CFString>() });
 
     let mut theme_set = ThemeSet::load_defaults();
-    let mut syntax_set = SyntaxSet::load_defaults_nonewlines();
+    let mut syntax_builder = SyntaxSet::load_defaults_nonewlines().into_builder();
 
     if let Some(theme_dir) = theme_dir {
         let directory = theme_dir.to_string();
         let theme_dir = Path::new(&directory);
-        if let Ok(mut custom_themes) = ThemeSet::load_from_folder(&theme_dir) {
-            theme_set.themes.append(&mut custom_themes.themes);
-        }
+        theme_set
+            .add_from_folder(&theme_dir)
+            .unwrap_or_else(|e| log(&e.to_string()));
     };
 
     if let Some(syntax_dir) = syntax_dir {
         let directory = syntax_dir.to_string();
         let syntax_dir = Path::new(&directory);
-        if let Ok(custom_syntaxes) = SyntaxSet::load_from_folder(&syntax_dir) {
-            for set in custom_syntaxes.syntaxes() {
-                syntax_set.add_syntax(set.clone());
-            }
-            syntax_set.link_syntaxes()
-        }
+        syntax_builder
+            .add_from_folder(&Path::new(&syntax_dir), false)
+            .unwrap_or_else(|e| log(&e.to_string()));
     };
+
+    let syntax_set = syntax_builder.build();
 
     let theme_bytes = include_bytes!("../res/XCodelike.tmTheme");
     let xcode_theme = ThemeSet::load_from_reader(&mut Cursor::new(&theme_bytes[..])).unwrap();
@@ -137,4 +135,10 @@ pub fn read_file_to_string(file_path: &Path) -> Result<Vec<u8>, ::std::io::Error
     let mut file = File::open(&file_path)?;
     file.read_to_end(&mut content)?;
     Ok(content)
+}
+
+pub fn log(log: &str) {
+    unsafe {
+        CFLog(0, CFString::new(log));
+    }
 }
